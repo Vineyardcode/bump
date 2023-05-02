@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { createNoise2D, createNoise3D } from 'simplex-noise';
+import { createNoise2D, createNoise3D, createNoise4D } from 'simplex-noise';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils'
+import { seededRandom } from 'three/src/math/MathUtils';
 
 
 
@@ -20,10 +21,8 @@ light.position.set(0, 10, 10);
 light.castShadow = true;
 scene.add(light);
 
-
-
-const sphereGeometry = new THREE.SphereGeometry(5, 20, 50);
-
+const sphereGeometry = new THREE.SphereGeometry(5, 50, 50);
+sphereGeometry.translate(0,0,0)
 const material = new THREE.MeshNormalMaterial({
   flatShading: true,
   side: THREE.DoubleSide,
@@ -32,7 +31,17 @@ const material = new THREE.MeshNormalMaterial({
 
 const sphereMesh = new THREE.Mesh(sphereGeometry, material);
 sphereMesh.geometry.scale(-1, 1, 1);
-scene.add(sphereMesh);
+scene.add(sphereMesh); 
+
+
+  let time = 0.01;
+  const noiseScale = 5;
+  const noise4D = createNoise4D(); 
+  const noise3D = createNoise3D(); 
+  const noise2D = createNoise2D(); 
+  const vertices = sphereGeometry.attributes.position.array;
+
+
 
 
 
@@ -67,6 +76,9 @@ navigator.mediaDevices.getUserMedia({audio: {deviceId: 'VBAudioVACWDM'}})
 
     const bufferLength = analyser.frequencyBinCount;
   
+ 
+
+
 
 function animate() {
 
@@ -89,12 +101,31 @@ function animate() {
   // console.log("Maximum frequency:", maxFrequency, "at index", maxIndex);
   // console.log("Average midtone frequency:", averageMidTone);
 
+  
+time+=0.01
 
-  requestAnimationFrame( animate );
+  for (let i = 0; i < vertices.length; i += 3) {
+    const x = vertices[i];
+    const y = vertices[i + 1];
+    const z = vertices[i + 2];
+
+    const position = new THREE.Vector3(x, y, z).normalize();
+    const noise = noise3D(position.x* noiseScale+time, position.y* noiseScale, position.z* noiseScale);
+    position.multiplyScalar(5+0.7 * noise );
+    position.toArray(vertices, i);
+  }
+ 
+  sphereGeometry.computeVertexNormals();
+  sphereGeometry.attributes.normal.needsUpdate = true;
+  sphereGeometry.attributes.position.needsUpdate = true;
+  sphereGeometry.rotateY(0.001);
+
+  requestAnimationFrame(animate);
   renderer.render( scene, camera );
   controls.update();
 
+  
 }
 
-animate();
+animate()
 });
