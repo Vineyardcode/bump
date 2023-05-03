@@ -17,16 +17,21 @@ const controls = new OrbitControls(camera, renderer.domElement);
 camera.position.z = 20;
 
 const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(0, 10, 10);
+const light0 = light.clone()
+// light0.position.set(0, -1, -1)
+light.position.set(0, -1, 0);
 light.castShadow = true;
+scene.add(light0);
 scene.add(light);
 
 const sphereGeometry = new THREE.SphereGeometry(5, 6, 100, 2.2, 5);
 sphereGeometry.translate(0,0,0)
+
 const material = new THREE.MeshNormalMaterial({
   flatShading: true,
   side: THREE.DoubleSide,
-  shadowSide: THREE.DoubleSide
+  shadowSide: THREE.DoubleSide,
+  
 });
 
 const sphereMesh = new THREE.Mesh(sphereGeometry, material);
@@ -106,43 +111,54 @@ scene.add(sphereMesh);
 
 
   const heartGeometry = new THREE.BufferGeometry();
-
-  // Set the vertices
+  const heartMaterial = new THREE.MeshStandardMaterial({ 
+    flatShading: true,
+ 
+    side: THREE.DoubleSide,
+  });
+ 
   const hvertices = new Float32Array(heartVertices.length * 3);
-  for (let i = 0; i < heartVertices.length; i++) {
-    hvertices[i * 3] = heartVertices[i].x;
-    hvertices[i * 3 + 1] = heartVertices[i].y;
-    hvertices[i * 3 + 2] = heartVertices[i].z;
-  }
+    for (let i = 0; i < heartVertices.length; i++) {
+      hvertices[i * 3] = heartVertices[i].x;
+      hvertices[i * 3 + 1] = heartVertices[i].y;
+      hvertices[i * 3 + 2] = heartVertices[i].z;
+    }
   heartGeometry.setAttribute('position', new THREE.BufferAttribute(hvertices, 3));
   
-  // Set the indices
+
   const indices = new Uint16Array(trianglesIndexes.length);
-  for (let i = 0; i < trianglesIndexes.length; i++) {
-    indices[i] = trianglesIndexes[i];
-  }
+    for (let i = 0; i < trianglesIndexes.length; i++) {
+      indices[i] = trianglesIndexes[i];
+    }
+
+
   heartGeometry.setIndex(new THREE.BufferAttribute(indices, 1));
-  
-  // Compute vertex normals
+  const hmesh = new THREE.Mesh(heartGeometry, heartMaterial);
+
+  heartGeometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(heartGeometry.attributes.position.array.length * 3), 3));
   heartGeometry.computeVertexNormals();
+
+  for (let i = 0; i < heartGeometry.attributes.normal.array.length; i +=3) {
+
+    const v1 = heartGeometry.index.array[i];
+    const v2 = heartGeometry.index.array[i + 1];
+    const v3 = heartGeometry.index.array[i + 2];
+
+    heartGeometry.attributes.color.setXYZ(v1, 255,0,2);
+    heartGeometry.attributes.color.setXYZ(v2, 255,0,3);
+    heartGeometry.attributes.color.setXYZ(v3, 255,0,1);
+    
+  }
+
+
+  hmesh.material.vertexColors = true;
   
-
-
-
-
-  const hmesh = new THREE.Mesh(heartGeometry, material);
-  
-  // Add the mesh to the scene
   scene.add(hmesh);
-
-
-
-
+  console.log(hmesh);
 
 
   hmesh.scale.set(0.3,0.3,0.3)
   hmesh.position.set(0,-2,0)
-
 
 
 
@@ -218,7 +234,7 @@ time+=0.01
   sphereGeometry.attributes.normal.needsUpdate = true;
   sphereGeometry.attributes.position.needsUpdate = true;
 
-
+  hmesh.geometry.attributes.normal.needsUpdate = true;
 
   // sphereGeometry.rotateY(-0.001);
   
