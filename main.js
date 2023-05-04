@@ -116,6 +116,54 @@ scene.add(sphereMesh);
  
     side: THREE.DoubleSide,
   });
+
+  let dancing = 0.01;
+
+  const customMate = new THREE.ShaderMaterial({
+    uniforms: {
+      color: { value: new THREE.Color(0x24BFE8) },
+      cameraPosition: { value: new THREE.Vector3() },
+      modelMatrix: { value: new THREE.Matrix4() }, 
+      averageFrequency: { value: 0.0 },
+    },
+    vertexShader: `
+    varying vec3 vNormal;
+    varying vec3 vPosition;
+    uniform float averageFrequency;
+
+    void main() {
+      vNormal = normal;
+      vec3 pos = position.xyz;
+      pos += sin(pos * averageFrequency) * 0.2;
+      vPosition = pos;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    }
+    `,
+    fragmentShader: `
+      uniform vec3 color;
+      uniform mat4 modelMatrix;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+  
+      void main() {
+        vec3 normal = normalize(cross(dFdx(vPosition), dFdy(vPosition)));
+        vec3 viewDirection = normalize(cameraPosition - (modelMatrix * vec4(vPosition, 1.0)).xyz); // Compute view direction using model matrix
+        float light = dot(normal, viewDirection);
+        gl_FragColor = vec4(color * 0.5 + 0.5 * light, 1.0);
+      }
+    `,
+  });
+
+
+
+
+  console.log(customMate);
+
+
+  const normalMate = new THREE.MeshNormalMaterial({
+    flatShading: true,
+  })
+
  
   const hvertices = new Float32Array(heartVertices.length * 3);
     for (let i = 0; i < heartVertices.length; i++) {
@@ -125,15 +173,14 @@ scene.add(sphereMesh);
     }
   heartGeometry.setAttribute('position', new THREE.BufferAttribute(hvertices, 3));
   
-
   const indices = new Uint16Array(trianglesIndexes.length);
     for (let i = 0; i < trianglesIndexes.length; i++) {
       indices[i] = trianglesIndexes[i];
     }
 
-
   heartGeometry.setIndex(new THREE.BufferAttribute(indices, 1));
-  const hmesh = new THREE.Mesh(heartGeometry, heartMaterial);
+
+  const hmesh = new THREE.Mesh(heartGeometry, customMate);
 
   heartGeometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(heartGeometry.attributes.position.array.length * 3), 3));
   heartGeometry.computeVertexNormals();
@@ -144,9 +191,9 @@ scene.add(sphereMesh);
     const v2 = heartGeometry.index.array[i + 1];
     const v3 = heartGeometry.index.array[i + 2];
 
-    heartGeometry.attributes.color.setXYZ(v1, 255,0,2);
-    heartGeometry.attributes.color.setXYZ(v2, 255,0,3);
-    heartGeometry.attributes.color.setXYZ(v3, 255,0,1);
+    heartGeometry.attributes.color.setXYZ(v1, 255,0.01,1.1);
+    heartGeometry.attributes.color.setXYZ(v2, 255,0.001,0.5);
+    heartGeometry.attributes.color.setXYZ(v3, 255,0.01,0.9);
     
   }
 
@@ -154,7 +201,6 @@ scene.add(sphereMesh);
   hmesh.material.vertexColors = true;
   
   scene.add(hmesh);
-  console.log(hmesh);
 
 
   hmesh.scale.set(0.3,0.3,0.3)
@@ -215,9 +261,9 @@ function animate() {
   // console.log("Average frequency:", averageFrequency);
   // console.log("Maximum frequency:", maxFrequency, "at index", maxIndex);
   // console.log("Average midtone frequency:", averageMidTone);
-
+  dancing = averageFrequency
   
-time+=0.01
+  time+=0.01
 
   for (let i = 0; i < vertices.length; i += 3) {
     const x = vertices[i];
@@ -237,7 +283,11 @@ time+=0.01
   hmesh.geometry.attributes.normal.needsUpdate = true;
 
   // sphereGeometry.rotateY(-0.001);
-  
+  heartGeometry.rotateY(-0.01)
+  customMate.uniforms.cameraPosition.value.copy(camera.position);
+  customMate.uniforms.averageFrequency.value = averageFrequency;
+
+
   requestAnimationFrame(animate);
   renderer.render( scene, camera );
   controls.update();

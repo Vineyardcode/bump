@@ -75,3 +75,34 @@
   
   // sphereGeometry.attributes.normal.needsUpdate = true;
   // sphereGeometry.attributes.position.needsUpdate = true;
+
+
+  const customMateriala = new THREE.ShaderMaterial({
+    uniforms: {
+      color: { value: new THREE.Color(0x0f0ff0) }
+    },
+  
+    vertexShader: `
+      varying vec3 vNormal;
+  
+      void main() {
+        vNormal = normal;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+  
+    fragmentShader: `
+      uniform vec3 color;
+      varying vec3 vNormal;
+  
+      void main() {
+        vec3 normal = normalize(cross(dFdx(vNormal), dFdy(vNormal)));
+        gl_FragColor = vec4(color * 0.5 + 0.5 * abs(normal), 1.0);
+      }
+    `,
+  });
+
+
+
+
+
