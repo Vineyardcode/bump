@@ -52,15 +52,6 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
   const noise2D = createNoise2D(); 
   const vertices = sphereGeometry.attributes.position.array;
 
-  const boxGeometry = new THREE.BoxGeometry(200, 200, 200);
-  boxGeometry.translate(0,0,0)
-
-
-  const boxMesh = new THREE.Mesh(boxGeometry, material);
-  
-
-  scene.add(boxMesh); 
-
   //--------------------------- HEART ---------------------------// 
 
   const heartVertices = [
@@ -166,7 +157,8 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 					envMap: cubeRenderTarget.texture,
 					roughness: 0.005,
 					metalness: 1,
-          side: THREE.DoubleSide
+          side: THREE.DoubleSide,
+          flatShading: true
 				} );
 
         const fuckingBallGeometry0 = new THREE.IcosahedronGeometry(3.2, 1);
@@ -177,10 +169,19 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
         const boxMesh0 = new THREE.Mesh(fuckingBallGeometry0, material1);
         const fuckingBallMesh = new THREE.Mesh(fuckingBallGeometry1, material);
         
-        scene.add(fuckingBallMesh)
+        // scene.add(fuckingBallMesh)
         scene.add(boxMesh0); 
 
         console.log(cubeRenderTarget);
+
+        const boxGeometry = new THREE.BoxGeometry(200, 200, 200);
+        boxGeometry.translate(0,0,0)
+      
+      
+        const boxMesh = new THREE.Mesh(boxGeometry, material);
+        
+      
+        scene.add(boxMesh); 
 
   const customMate = new THREE.ShaderMaterial({
 
