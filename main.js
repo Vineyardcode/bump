@@ -42,7 +42,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
   sphereMesh.geometry.scale(1, 1, 1);
   scene.add(sphereMesh); 
 
-
   let time = 0.001;
   const noiseScale = 1.3;
 
@@ -126,7 +125,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
     12,14,13
   ]
 
-  const heartGeometry = new THREE.BufferGeometry();
+  const heartGeometry = new THREE.BufferGeometry(); // put either heart or ball to the hmesh
+
+  const sphereG = new THREE.IcosahedronGeometry(5,1)
 
   const hvertices = new Float32Array(heartVertices.length * 3);
     for (let i = 0; i < heartVertices.length; i++) {
@@ -155,13 +156,13 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
   const boxMesh = new THREE.Mesh(boxGeometry, material);
   boxMesh.rotateY(70)
 
-  const hmesh = new THREE.Mesh(heartGeometry, material1);
+  const hmesh = new THREE.Mesh(sphereG, material1);
 
   scene.add(boxMesh); 
   scene.add(hmesh);
 
-  hmesh.scale.set(0.3,0.3,0.3)
-  hmesh.position.set(0,-2,0)
+  hmesh.scale.set(0.59,0.59,0.59)
+  hmesh.position.set(0,0,0)
   hmesh.castShadow = true
   hmesh.receiveShadow = true
   hmesh.add(cubeCamera)
@@ -170,7 +171,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 //--------------------------- ANIMATION ---------------------------//
 
   function animate() {
-
 
     time+=0.01
     
@@ -190,7 +190,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
     sphereGeometry.attributes.normal.needsUpdate = true;
     sphereGeometry.attributes.position.needsUpdate = true;
 
-    heartGeometry.rotateY(-0.01)
+    hmesh.rotateY(-0.005)
+    hmesh.rotateX(-0.005)
 
     cubeCamera.position.copy( hmesh.position );
 
