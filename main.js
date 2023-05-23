@@ -209,18 +209,3 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 
   animate()
 
-  //--------------------------- DISPLAY THE PAGE IN AN IFRAME IN MY PORTFOLIO ---------------------------//
-
-  window.addEventListener("message", receiveMessage);
-
-  function receiveMessage(event) {
-
-    if (event.origin === "https://vineyard-kappa.vercel.app/") {
-      // The message was sent from the portfolio page
-      console.log(event.data);
-
-      event.source.postMessage("Sup ?", event.origin);
-    } else {
-      return;
-    }
-  }
